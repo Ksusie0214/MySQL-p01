@@ -19,8 +19,10 @@ from employees;
 마지막으로 신입사원이 들어온 날은 언제 입니까? 다음 형식으로 출력해주세요.
 예) 2014년 07월 10일
 */
-select  max(hire_date),
-		replace(hire_date);
+select 	max(hire_date),
+		date_format(max(hire_date), '%Y년 %m월 %d일')
+		
+from employees;
         
 /*
 문제4.
@@ -28,12 +30,12 @@ select  max(hire_date),
 정렬순서는 부서번호(department_id) 내림차순입니다.
 */
 
-select  avg(salary),
-		max(salary),
-        min(salary)
-from employees, departments
-group by departments_name
-having department_id
+select  department_id 부서아이디,
+		avg(salary) 평균임금,
+		max(salary) 최고임금,
+        min(salary) 최저임금
+from employees
+group by department_id
 order by department_id desc;
 
 /*
@@ -48,7 +50,7 @@ select  avg(salary),
         job_id
 from employees
 group by job_id
-order by max(salary) desc , truncate(avg(salary),0)asc;
+order by max(salary) desc , round(avg(salary),0) asc;
 
 /*
 문제6.
@@ -70,12 +72,13 @@ from employees;
 */
 
 select  department_id,
-		avr(salary),
+		avg(salary),
 		min(salary),
-        avr(salary)-min(salary)
+        avg(salary)-min(salary)
 from employees
-having department_id<avg(salary)-min(salary)
-group by avg(salary)-min(salary) desc;
+group by department_id
+having avg(salary)-min(salary)<2000
+order by avg(salary)-min(salary) desc;
 
 
 
@@ -86,9 +89,11 @@ group by avg(salary)-min(salary) desc;
 */
 
 select  job_id , 
+		max(salary),
+        min(salary),
 		max(salary)-min(salary)
 from employees
-group by jobs_id
+group by job_id
 order by max(salary)-min(salary) desc;
 
 
@@ -103,18 +108,13 @@ order by max(salary)-min(salary) desc;
 */
 
 select  manager_id,
-		truncate(avg(salary),1)  avg,
-		min(salary) as min,
-        max(salary)  as max
+		round(avg(salary),1) avg,
+		min(salary) min,
+        max(salary) max
 from employees
 group by manager_id
 having avg(salary)>=5000
-and hire_date>=2005/01/01;
-
-
-        
-
-
+order by round(avg(salary),1) desc;
 
 
 
@@ -127,17 +127,13 @@ and hire_date>=2005/01/01;
 */
 
 select hire_date,
-case when hire_date<=02/12/31 then '창립맴버',
-case when hire_date<=03/12/31 and hire_date>02/12/31 then '03년 입사',
-case when hire_date<=04/12/31 and hire_date>03/12/31 then '04년 입사',
+case when hire_date<=02/12/31 then '창립맴버'
+	 when hire_date<=03/12/31 and hire_date>02/12/31 then '03년 입사'
+	 when hire_date<=04/12/31 and hire_date>03/12/31 then '04년 입사'
 else '상장이후 입사'
 End as optDate
 from employees
 order by hire_date asc;
-
-
-
-
 
 
 /*
@@ -145,6 +141,16 @@ order by hire_date asc;
 가장 오래 근속한 직원의 입사일은 언제인가요? 다음 형식으로 출력해주세요.
 예) 2005년 08월 20일(토요일)
 */
-select  min(hire_date),
-		date_format(min(hire_date), '%Y년 %m월 %d일 (%W)')
+-- case when 을 사용하여 요일에 어떤 문자가 들어갈때 그것이 한글로 바뀌도록 했다.
+
+select 	date_format(min(hire_date), '%Y년 %m월 %d일 %a'),
+case when date_format(min(hire_date), '%a') = 'Mon' then '월요일'
+	 when date_format(min(hire_date), '%a') = 'Tue' then '화요일'
+	 when date_format(min(hire_date), '%a') = 'Wed' then '수요일'
+	 when date_format(min(hire_date), '%a') = 'Thu'	then '목요일'
+	 when date_format(min(hire_date), '%a') = 'Fri'	then '금요일'
+	 when date_format(min(hire_date), '%a') = 'Sat' then '토요일'
+else '일요일'
+end days
+        
 from employees;
